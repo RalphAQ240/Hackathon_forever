@@ -1,0 +1,222 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>R2R RETRUN TO REDEEM</title>
+  <script src="./jsQR.js"></script>
+  <link href="https://fonts.googleapis.com/css?family=Ropa+Sans" rel="stylesheet">
+
+
+
+
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
+  <!-- Latest compiled and minified JavaScript -->
+   <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd" crossorigin="anonymous"></script>
+  <!-- Optional theme -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap-theme.min.css" integrity="sha384-6pzBo3FDv/PJ8r2KRkGHifhEocL+1X2rVCTTkUfGk7/0pbek5mMa1upzvWbrUbOZ" crossorigin="anonymous">
+
+
+  <style>
+    body {
+      font-family: 'Ropa Sans', sans-serif;
+      color: #333;
+      max-width: 640px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    #githubLink {
+      position: absolute;
+      right: 0;
+      top: 12px;
+      color: #2D99FF;
+    }
+
+    h1 {
+      margin: 10px 0;
+      font-size: 40px;
+    }
+
+    #loadingMessage {
+      text-align: center;
+      padding: 40px;
+      background-color: #eee;
+    }
+
+    #canvas {
+      width: 100%;
+    }
+
+    #output {
+      margin-top: 20px;
+      background: #eee;
+      padding: 10px;
+      padding-bottom: 0;
+    }
+
+    #output div {
+      padding-bottom: 10px;
+      word-wrap: break-word;
+    }
+
+    #noQRFound {
+      text-align: center;
+    }
+  </style>
+</head>
+<body >
+  <h1 align="center" ><img src="../src/MicrosoftTeams-image.png" height="100" width="200"> R2R  RETURN TO REDEEM</h1>
+  <!--<a id="githubLink" href="https://github.com/cozmo/jsQR">View documentation on Github</a>-->
+  <!-- <p>Pure JavaScript QR code decoding library.</p> -->
+  <div id="loadingMessage" class="text-warning font-italic">🎥 Unable to access video stream (please make sure you have a webcam enabled)</div>
+  <canvas id="canvas" hidden></canvas>
+  <div id="output" hidden>
+    <div id="outputMessage" align="center" class="text-warning">No QR Code detected.</div>
+    <div hidden><b>Data:</b> <span id="outputData"></span></div>
+
+  </div>
+
+  <!--Changes log ralph -->
+      <div id="metdata">
+      <table id="tdda" " class="table table-dark">
+         <tr><th>Item ID</th> <th>Product Type</th><th>Recycling date and time</th><th>Dropbox ID</th><th>Points</th></tr>
+         <tr id ="tr1"><td id="td1"></td><td id="td2"></td><td id="td3"></td><td id="td4"></td><td id="td5"></td></tr>
+      </table>
+    </div>
+<!--Changes log ralph -->
+
+
+
+
+
+
+  <script>
+    var video = document.createElement("video");
+    var canvasElement = document.getElementById("canvas");
+    var canvas = canvasElement.getContext("2d");
+    var loadingMessage = document.getElementById("loadingMessage");
+    var outputContainer = document.getElementById("output");
+    var outputMessage = document.getElementById("outputMessage");
+    var outputData = document.getElementById("outputData");
+    //Changes log ralph
+    var metdata = document.getElementById("metdata");
+    var td1 = document.getElementById("td1");
+    var td2 = document.getElementById("td2");
+    var td3 = document.getElementById("td3");
+    var td4 = document.getElementById("td4");
+    var td5 = document.getElementById("td5");
+    //Changes log ralph
+
+
+    function drawLine(begin, end, color) {
+      canvas.beginPath();
+      canvas.moveTo(begin.x, begin.y);
+      canvas.lineTo(end.x, end.y);
+      canvas.lineWidth = 4;
+      canvas.strokeStyle = color;
+      canvas.stroke();
+    }
+
+    // Use facingMode: environment to attemt to get the front camera on phones
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(function(stream) {
+      video.srcObject = stream;
+      video.setAttribute("playsinline", true); // required to tell iOS safari we don't want fullscreen
+      video.play();
+      requestAnimationFrame(tick);
+    });
+
+    function tick() {
+      loadingMessage.innerText = "⌛ Loading video..."
+      if (video.readyState === video.HAVE_ENOUGH_DATA) {
+        loadingMessage.hidden = true;
+        canvasElement.hidden = false;
+        outputContainer.hidden = false;
+
+        canvasElement.height = video.videoHeight;
+        canvasElement.width = video.videoWidth;
+        canvas.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
+        var imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
+        var code = jsQR(imageData.data, imageData.width, imageData.height, {
+          inversionAttempts: "dontInvert",
+        });
+        if (code) {
+          drawLine(code.location.topLeftCorner, code.location.topRightCorner, "#FF3B58");
+          drawLine(code.location.topRightCorner, code.location.bottomRightCorner, "#FF3B58");
+          drawLine(code.location.bottomRightCorner, code.location.bottomLeftCorner, "#FF3B58");
+          drawLine(code.location.bottomLeftCorner, code.location.topLeftCorner, "#FF3B58");
+          outputMessage.hidden = true;
+          outputData.parentElement.hidden = false;
+          outputData.innerText = code.data;
+
+          //changes ralph
+          if (code.data == "http://myezqrcodes.com"){
+          //  if (code.data != null){
+
+            var table = document.getElementById("tdda");
+            var row = table.insertRow(1);
+            var cell1 = row.insertCell(0);
+            var cell2 = row.insertCell(1);
+            var cell3 = row.insertCell(2);
+            var cell4 = row.insertCell(3);
+            var cell5 = row.insertCell(4);
+            cell1.innerHTML = "12345";
+            cell2.innerHTML = "SAN001";
+            cell3.innerHTML = "02/02/2020";
+            cell4.innerHTML = "26782";
+            cell5.innerHTML = "8";
+
+            if (row[1]==row[2]){
+              table.deleteRow(2);
+            }
+          }
+           else{
+
+           }
+
+        
+          // console.log(code);
+          // var dt = new Date(year, month, day, hours, minutes);
+          // IF (code.data == "http://myezqrcodes.com"){
+          // var odiv = createElement("div");
+          // var otable = createElement("table");
+          // otable.createTHead("Item ID", "Product Type", "Receiving date/time", "Dropbox ID", "Category", "Points");
+          // otable.insertRow("177141","SM001", dt, "27890", "CS", "8");
+          // odiv.appendChild(otable); 
+          // document.body.appendChild(odiv); 
+          // }
+          // else{
+
+          // }
+          
+
+        } else {
+          outputMessage.hidden = false;
+          outputData.parentElement.hidden = true;
+          metdata.hidden = false;
+        }
+      }
+      requestAnimationFrame(tick);
+    }
+    // function rdata(){
+    //             // var dt = new Date(year, month, day, hours, minutes);
+    //       IF (code.data == "http://myezqrcodes.com"){
+    //       var odiv = createElement("div");
+    //       var otable = createElement("table");
+    //       otable.createTHead("Item ID", "Product Type", "Receiving date/time", "Dropbox ID", "Category", "Points");
+    //       otable.insertRow("177141","SM001", dt, "27890", "CS", "8");
+    //       odiv.appendChild(otable); 
+    //       document.body.appendChild(odiv); 
+    //       }
+    //       else{
+
+    //       }
+    // }
+  </script>
+
+
+</body>
+</html>
+
+
+
+
